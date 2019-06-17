@@ -1,0 +1,2 @@
+ipynb == 0.5.1
+-e git://github.com/shakedzy/dython.git#egg=dython

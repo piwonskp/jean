@@ -1,19 +1,11 @@
+import pandas as pd
+from sklearn import preprocessing
 from ipynb.fs.full.jean.common._2dual_status import appls
 
-yesno_map = {
-    'NIE': 0,
-    'TAK': 1
-}
-yesno_en_map = {
-    'NO': 0,
-    'YES': 1
-}
-
 to_factorize = [
-    'Student', 'Tryb studiów', 'Typ studiów', 'Język wykładowy', 'Kierunek',
-    'Osoba przyjmująca', 'Osoba przypisana', 'Semestr rejestracji',
-    'Semestr aktualny', 'Brakujace przedmioty',
-    'Informacje o pracach dyplomowych'
+    'Tryb studiów', 'Typ studiów', 'Język wykładowy', 'Kierunek',
+    'Osoba przyjmująca', 'Semestr rejestracji',
+    'Semestr aktualny', 'Brakujace przedmioty'
 ]
 
 yesno_cols = [
@@ -31,9 +23,15 @@ yesno_en_cols = [
     'Słowo postęp w uzasadnieniu',
     'Złożone odwołanie'
 ]
-appls[to_factorize] = appls[to_factorize].stack().rank(method='dense').unstack()
 
-for c in yesno_cols: 
-    appls[c] = appls[c].map(yesno_map)
-for c in yesno_en_cols: 
-    appls[c] = appls[c].map(yesno_en_map)
+
+le = preprocessing.LabelEncoder()
+
+apply_encoder = lambda df, labels: df.apply(le.fit(labels).transform).astype('bool')
+
+appls[yesno_cols] = apply_encoder(appls[yesno_cols], ['NIE', 'TAK'])
+appls[yesno_en_cols] = apply_encoder(appls[yesno_en_cols], ['NO', 'YES'])
+
+DATETIME_COLS = ['Data złożenia', 'Data zamknięcia']
+appls[DATETIME_COLS] = appls[DATETIME_COLS].apply(lambda col: pd.to_datetime(col, format='%d.%m.%y %H:%M', errors='coerce'))
+appls[['submitted', 'closed']] = appls[DATETIME_COLS].applymap(lambda dt: dt.dayofyear)

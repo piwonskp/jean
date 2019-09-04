@@ -10,7 +10,7 @@ reasonable_status = {
 }
 
 appls = appls[appls.Status.isin(reasonable_status)]
-appls['Status'] = appls['Status'].map(reasonable_status)
+appls['accepted'] = appls['Status'].map(reasonable_status).astype('bool')
 
 appls['Data złożenia'] = pd.DatetimeIndex(appls['Data złożenia'])
 appls['Data zamknięcia'] = pd.to_datetime(appls['Data zamknięcia'], errors='coerce')
